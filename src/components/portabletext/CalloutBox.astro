@@ -1,0 +1,25 @@
+---
+import { PortableText } from 'astro-portabletext';
+
+interface Props {
+  node: { content?: any[] };
+}
+const { node } = Astro.props;
+---
+
+<div class="callout-box">
+  <PortableText value={node.content || []} />
+</div>
+
+<style>
+  .callout-box {
+    border-left: 3px solid var(--color-text-secondary);
+    background: var(--color-bg-raised);
+    padding: var(--space-2) var(--space-3);
+    margin: var(--space-3) 0;
+  }
+
+  .callout-box :global(p:last-child) {
+    margin-bottom: 0;
+  }
+</style>

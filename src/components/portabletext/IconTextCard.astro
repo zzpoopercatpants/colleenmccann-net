@@ -1,0 +1,44 @@
+---
+import { PortableText } from 'astro-portabletext';
+import { urlFor } from '../../lib/sanity';
+
+interface Props {
+  node: { image?: { alt?: string; [key: string]: any }; heading?: string; body?: any[] };
+}
+const { node } = Astro.props;
+---
+
+<div class="icon-text-card">
+  {node.image && (
+    <img src={urlFor(node.image).width(200).url()} alt={node.image.alt || ''} loading="lazy" />
+  )}
+  <div class="icon-text-card-body">
+    {node.heading && <h4>{node.heading}</h4>}
+    <PortableText value={node.body || []} />
+  </div>
+</div>
+
+<style>
+  .icon-text-card {
+    display: flex;
+    gap: var(--space-3);
+    align-items: flex-start;
+    margin: var(--space-3) 0;
+  }
+
+  .icon-text-card img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  .icon-text-card-body h4 {
+    margin-bottom: var(--space-1);
+  }
+
+  .icon-text-card-body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+</style>

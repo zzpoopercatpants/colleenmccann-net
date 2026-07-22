@@ -1,23 +1,28 @@
 ---
-import { toHTML } from '@portabletext/to-html';
-import { urlFor } from '../lib/sanity';
+import { PortableText as PT } from 'astro-portabletext';
+import SanityImage from './portabletext/SanityImage.astro';
+import CalloutBox from './portabletext/CalloutBox.astro';
+import IconTextCard from './portabletext/IconTextCard.astro';
+import Table from './portabletext/Table.astro';
 
 interface Props {
   value: any[];
 }
 const { value } = Astro.props;
 
-const html = toHTML(value || [], {
-  components: {
-    types: {
-      image: ({ value }: any) =>
-        `<img src="${urlFor(value).width(800).url()}" alt="${(value.alt || '').replace(/"/g, '&quot;')}" loading="lazy" />`,
-    },
+const components = {
+  type: {
+    image: SanityImage,
+    calloutBox: CalloutBox,
+    iconTextCard: IconTextCard,
+    richTableBlock: Table,
   },
-});
+};
 ---
 
-<div class="prose" set:html={html} />
+<div class="prose">
+  <PT value={value || []} components={components} />
+</div>
 
 <style>
   .prose {
@@ -50,5 +55,11 @@ const html = toHTML(value || [], {
     padding-left: var(--space-3);
     color: var(--color-text-muted);
     margin: var(--space-3) 0;
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin: 0 0 var(--space-3);
+    padding-left: 1.25rem;
   }
 </style>

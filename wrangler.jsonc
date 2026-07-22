@@ -3,10 +3,15 @@
   "name": "colleenmccann-net",
   "compatibility_date": "2026-07-01",
   "main": "./src/worker.ts",
+  "workers_dev": true,
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
     "run_worker_first": true
-  }
+  },
+  "routes": [
+    { "pattern": "colleenmccann.net", "custom_domain": true },
+    { "pattern": "www.colleenmccann.net", "custom_domain": true }
+  ]
 }

@@ -1,0 +1,91 @@
+---
+import { PortableText } from 'astro-portabletext';
+
+interface Cell {
+  _key: string;
+  content?: any[];
+}
+interface Row {
+  _key: string;
+  title?: string;
+  cells?: Cell[];
+}
+interface ColumnHeader {
+  _key: string;
+  title?: string;
+  cellIndex: number;
+  width?: number;
+}
+interface Props {
+  node: {
+    rows?: Row[];
+    columnHeaders?: ColumnHeader[];
+    hasColumnTitles?: boolean;
+    hasRowTitles?: boolean;
+  };
+}
+const { node } = Astro.props;
+const rows = node.rows || [];
+const columnHeaders = [...(node.columnHeaders || [])].sort((a, b) => a.cellIndex - b.cellIndex);
+const hasColumnTitles = node.hasColumnTitles && columnHeaders.length > 0;
+const hasRowTitles = node.hasRowTitles;
+---
+
+<div class="rich-table-wrap">
+  <table class="rich-table">
+    {hasColumnTitles && (
+      <thead>
+        <tr>
+          {hasRowTitles && <th scope="col"></th>}
+          {columnHeaders.map((col) => (
+            <th scope="col" style={col.width ? `width:${col.width}px` : undefined}>
+              {col.title}
+            </th>
+          ))}
+        </tr>
+      </thead>
+    )}
+    <tbody>
+      {rows.map((row) => (
+        <tr>
+          {hasRowTitles && <th scope="row">{row.title}</th>}
+          {(row.cells || []).map((cell) => (
+            <td>
+              <PortableText value={cell.content || []} />
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .rich-table-wrap {
+    overflow-x: auto;
+    margin: var(--space-3) 0;
+  }
+
+  .rich-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.95rem;
+  }
+
+  .rich-table th,
+  .rich-table td {
+    border: 1px solid var(--color-border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .rich-table th {
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
+
+  .rich-table :global(p) {
+    margin: 0;
+  }
+</style>
