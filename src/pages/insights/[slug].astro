@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PortableText from '../../components/PortableText.astro';
+import { getAllInsights, getInsightBySlug } from '../../lib/sanity';
+import { formatDate } from '../../lib/utils';
+
+export async function getStaticPaths() {
+  const insights = await getAllInsights();
+  return insights
+    .filter((i) => i.format === 'article')
+    .map((i) => ({ params: { slug: i.slug } }));
+}
+
+const { slug } = Astro.params;
+const entry = await getInsightBySlug(slug!);
+if (!entry) return Astro.redirect('/insights');
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: entry.title,
+  description: entry.summary,
+  datePublished: entry.publishDate,
+  author: { '@type': 'Person', name: 'Colleen McCann' },
+  keywords: entry.topics.join(', '),
+};
+---
+
+<BaseLayout title={entry.title} description={entry.summary} active="insights" jsonLd={jsonLd}>
+  <article class="wrap post">
+    <a class="link muted back-link" href="/insights">&larr; Back to Insights</a>
+    <div class="entry-top">
+      <span class="badge badge-insights">{entry.topics[0]}</span>
+      <span class="text-muted">{formatDate(entry.publishDate)}</span>
+    </div>
+    <h1>{entry.title}</h1>
+    <p class="text-secondary summary">{entry.summary}</p>
+
+    <hr />
+
+    <PortableText value={entry.body || []} />
+  </article>
+</BaseLayout>
+
+<style>
+  .post {
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-5);
+    max-width: 720px;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-bottom: var(--space-3);
+  }
+
+  .entry-top {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+
+  .summary {
+    font-size: 1.1rem;
+  }
+</style>

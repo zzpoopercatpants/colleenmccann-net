@@ -1,0 +1,36 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
+.idea/
+
+# raw planning materials and source files, not site code
+/colleenmccann-net-build-brief.MD
+/READ ME FIRST.txt
+/Colleen Headshot.JPG
+/Human_vs_Humanoid_Labour_PL_Business_Case_FINAL.docx
+/scripts/assets/
+/scripts/paper-extract.json
+/scripts/paper-body.json
+
+# Claude Code local session files
+/.claude/

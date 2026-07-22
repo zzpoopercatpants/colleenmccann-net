@@ -1,0 +1,88 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getAllMedia } from '../../lib/sanity';
+import { formatDate } from '../../lib/utils';
+
+const media = await getAllMedia();
+
+const description =
+  'Talks and thought leadership at the intersections of AI, advanced manufacturing, leadership and organizational change.';
+
+const jsonLd = media
+  .filter((m) => m.linkUrl)
+  .map((m) => ({
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: m.title,
+    startDate: m.date,
+    organizer: { '@type': 'Organization', name: m.host },
+    performer: { '@type': 'Person', name: 'Colleen McCann' },
+    url: m.linkUrl,
+  }));
+---
+
+<BaseLayout title="Media" description={description} active="media" jsonLd={jsonLd}>
+  <section class="wrap page-head">
+    <h1>Media</h1>
+    <p class="text-secondary subhead">{description}</p>
+  </section>
+
+  <section class="wrap entries">
+    {media.map((m) => (
+      <article class="card entry">
+        <div class="entry-top">
+          <span class="badge badge-media">{m.type}</span>
+          <span class="text-muted">{formatDate(m.date)}</span>
+        </div>
+        <h3>{m.title}</h3>
+        <p class="text-muted host">{m.host}</p>
+        {m.linkUrl ? (
+          <a class="link link-external" href={m.linkUrl} target="_blank" rel="noopener">
+            {m.linkLabel || 'View'}
+          </a>
+        ) : (
+          <p class="text-muted no-recording">No recording</p>
+        )}
+      </article>
+    ))}
+  </section>
+</BaseLayout>
+
+<style>
+  .page-head {
+    padding-top: var(--space-4);
+  }
+
+  .subhead {
+    font-size: 1.1rem;
+    margin-top: -0.5rem;
+    max-width: 640px;
+  }
+
+  .entries {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-bottom: var(--space-5);
+  }
+
+  .entry-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-1);
+  }
+
+  .entry h3 {
+    margin-bottom: 0.25rem;
+  }
+
+  .host {
+    margin-bottom: var(--space-1);
+  }
+
+  .no-recording {
+    margin: 0;
+    font-style: italic;
+  }
+</style>

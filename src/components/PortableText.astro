@@ -1,0 +1,54 @@
+---
+import { toHTML } from '@portabletext/to-html';
+import { urlFor } from '../lib/sanity';
+
+interface Props {
+  value: any[];
+}
+const { value } = Astro.props;
+
+const html = toHTML(value || [], {
+  components: {
+    types: {
+      image: ({ value }: any) =>
+        `<img src="${urlFor(value).width(800).url()}" alt="${(value.alt || '').replace(/"/g, '&quot;')}" loading="lazy" />`,
+    },
+  },
+});
+---
+
+<div class="prose" set:html={html} />
+
+<style>
+  .prose {
+    color: var(--color-text-body);
+    font-size: 1.05rem;
+  }
+
+  .prose :global(h2),
+  .prose :global(h3) {
+    margin-top: var(--space-4);
+  }
+
+  .prose :global(p) {
+    margin: 0 0 var(--space-3);
+  }
+
+  .prose :global(a) {
+    color: var(--color-text-secondary);
+  }
+
+  .prose :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: var(--space-3) 0;
+  }
+
+  .prose :global(blockquote) {
+    border-left: 2px solid var(--color-border);
+    padding-left: var(--space-3);
+    color: var(--color-text-muted);
+    margin: var(--space-3) 0;
+  }
+</style>

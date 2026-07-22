@@ -1,0 +1,99 @@
+---
+interface Props {
+  active?: string;
+}
+const { active = '' } = Astro.props;
+
+const navItems = [
+  { href: '/research', label: 'Research', key: 'research' },
+  { href: '/insights', label: 'Insights', key: 'insights' },
+  { href: '/media', label: 'Media', key: 'media' },
+  { href: '/about', label: 'About', key: 'about' },
+  { href: '/contact', label: 'Contact', key: 'contact' },
+];
+---
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a href="/" class="brand">Colleen McCann</a>
+    <nav aria-label="Primary">
+      <ul>
+        {navItems.map((item) => (
+          <li>
+            <a href={item.href} aria-current={active === item.key ? 'page' : undefined}>
+              {item.label}
+            </a>
+          </li>
+        ))}
+        <li>
+          <a href="https://strategylanguage.com/" class="strategy-link" rel="noopener">
+            Strategy Language
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-3);
+  }
+
+  .brand {
+    color: var(--color-text-primary);
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+
+  .brand:hover {
+    text-decoration: none;
+  }
+
+  nav ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+  }
+
+  nav a {
+    color: var(--color-text-body);
+    font-size: 0.95rem;
+  }
+
+  nav a:hover {
+    color: var(--color-text-primary);
+    text-decoration: none;
+  }
+
+  nav a[aria-current='page'] {
+    color: var(--color-text-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+  }
+
+  .strategy-link {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+  }
+
+  .strategy-link::after {
+    content: '\2197';
+    display: inline-block;
+    margin-left: 0.25em;
+  }
+</style>

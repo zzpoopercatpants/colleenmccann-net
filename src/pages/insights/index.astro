@@ -1,0 +1,201 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getAllInsights } from '../../lib/sanity';
+import { yearOf, youTubeThumbnail } from '../../lib/utils';
+
+const insights = await getAllInsights();
+const allTopics = Array.from(new Set(insights.flatMap((i) => i.topics))).sort();
+
+const description = 'Short takes from Colleen McCann, and why they matter.';
+---
+
+<BaseLayout title="Insights" description={description} active="insights">
+  <section class="wrap page-head">
+    <h1>Insights</h1>
+    <p class="text-secondary subhead">Short takes, and why they matter.</p>
+  </section>
+
+  <section class="wrap filter-row">
+    <input
+      type="search"
+      id="search-input"
+      placeholder="Search by keyword"
+      aria-label="Search insights by keyword"
+    />
+    <div class="pills" role="group" aria-label="Filter by topic">
+      <button class="pill active" data-topic="All">All</button>
+      {allTopics.map((topic) => (
+        <button class="pill" data-topic={topic}>{topic}</button>
+      ))}
+    </div>
+  </section>
+
+  <section class="wrap entries">
+    {insights.map((i) => {
+      const href = i.format === 'article' ? `/insights/${i.slug}` : i.mediaUrl!;
+      const thumb = i.format === 'video' && i.mediaUrl ? youTubeThumbnail(i.mediaUrl) : null;
+      return (
+        <article
+          class="card entry"
+          data-topics={i.topics.join('|')}
+          data-search={`${i.title} ${i.summary}`.toLowerCase()}
+        >
+          {thumb && (
+            <a href={href} class="thumb-link" target="_blank" rel="noopener">
+              <img src={thumb} alt="" loading="lazy" width="320" height="180" />
+            </a>
+          )}
+          <div class="entry-top">
+            <span class="badge badge-insights">{i.topics[0]}</span>
+            <span class="text-muted">{yearOf(i.publishDate)}</span>
+          </div>
+          <h3>
+            {i.format === 'video' && <span class="format-icon" aria-label="Video" title="Video">&#9654;</span>}
+            {i.format === 'audio' && <span class="format-icon" aria-label="Audio" title="Audio">&#127911;</span>}
+            <a href={href} target={i.format === 'article' ? undefined : '_blank'} rel={i.format === 'article' ? undefined : 'noopener'}>
+              {i.title}
+            </a>
+          </h3>
+          <p>{i.summary}</p>
+          {i.duration && <p class="text-muted duration">{i.duration}</p>}
+        </article>
+      );
+    })}
+    <p class="text-muted no-results" hidden>No insights match your search.</p>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-head {
+    padding-top: var(--space-4);
+  }
+
+  .subhead {
+    font-size: 1.1rem;
+    margin-top: -0.5rem;
+  }
+
+  .filter-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: var(--space-3) auto var(--space-4);
+  }
+
+  #search-input {
+    background: var(--color-bg-raised);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    color: var(--color-text-primary);
+    padding: 0.6rem 0.9rem;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    max-width: 360px;
+  }
+
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .pill {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    border-radius: 999px;
+    padding: 0.3rem 0.8rem;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .pill.active {
+    border-color: var(--color-insights);
+    color: var(--color-insights);
+  }
+
+  .entries {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-3);
+    padding-bottom: var(--space-5);
+  }
+
+  .thumb-link {
+    display: block;
+    margin: calc(var(--space-3) * -1) calc(var(--space-3) * -1) var(--space-2);
+  }
+
+  .thumb-link img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .entry-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-1);
+  }
+
+  .entry h3 {
+    margin-bottom: var(--space-1);
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+
+  .format-icon {
+    font-size: 0.85em;
+    color: var(--color-text-muted);
+  }
+
+  .entry p {
+    font-size: 0.95rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .duration {
+    margin-bottom: 0;
+  }
+</style>
+
+<script>
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const pills = document.querySelectorAll<HTMLButtonElement>('.pill');
+  const entries = document.querySelectorAll<HTMLElement>('.entry');
+  const noResults = document.querySelector<HTMLElement>('.no-results');
+
+  let activeTopic = 'All';
+
+  function applyFilters() {
+    const query = searchInput.value.trim().toLowerCase();
+    let visibleCount = 0;
+
+    entries.forEach((entry) => {
+      const topics = (entry.dataset.topics || '').split('|');
+      const search = entry.dataset.search || '';
+      const matchesTopic = activeTopic === 'All' || topics.includes(activeTopic);
+      const matchesSearch = !query || search.includes(query);
+      const visible = matchesTopic && matchesSearch;
+      entry.hidden = !visible;
+      if (visible) visibleCount++;
+    });
+
+    if (noResults) noResults.hidden = visibleCount > 0;
+  }
+
+  pills.forEach((pill) => {
+    pill.addEventListener('click', () => {
+      pills.forEach((p) => p.classList.remove('active'));
+      pill.classList.add('active');
+      activeTopic = pill.dataset.topic || 'All';
+      applyFilters();
+    });
+  });
+
+  searchInput?.addEventListener('input', applyFilters);
+</script>

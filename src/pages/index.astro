@@ -1,0 +1,152 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getAllResearch, getAllInsights, getAllMedia, getAbout, urlFor } from '../lib/sanity';
+
+const [research, insights, media, about] = await Promise.all([
+  getAllResearch(),
+  getAllInsights(),
+  getAllMedia(),
+  getAbout(),
+]);
+
+type LatestItem = {
+  key: string;
+  href: string;
+  badgeClass: string;
+  badgeLabel: string;
+  title: string;
+  description: string;
+  date: string;
+};
+
+const latest: LatestItem[] = [
+  ...research.map((r) => ({
+    key: `research-${r._id}`,
+    href: r.hostingType === 'onsite' ? `/research/${r.slug}` : r.externalUrl!,
+    badgeClass: 'badge-research',
+    badgeLabel: 'Research',
+    title: r.title,
+    description: r.abstract,
+    date: r.publishDate,
+  })),
+  ...insights.map((i) => ({
+    key: `insights-${i._id}`,
+    href: i.format === 'article' ? `/insights/${i.slug}` : i.mediaUrl!,
+    badgeClass: 'badge-insights',
+    badgeLabel: 'Insights',
+    title: i.title,
+    description: i.summary,
+    date: i.publishDate,
+  })),
+  ...media.map((m) => ({
+    key: `media-${m._id}`,
+    href: m.linkUrl || '/media',
+    badgeClass: 'badge-media',
+    badgeLabel: 'Media',
+    title: m.title,
+    description: `${m.type} — ${m.host}`,
+    date: m.date,
+  })),
+]
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  .slice(0, 6);
+
+const description =
+  'Colleen McCann connects ideas across disciplines, translating complexity into practical insight for leaders navigating what’s next.';
+---
+
+<BaseLayout title="Colleen McCann" description={description} active="">
+  <section class="hero wrap">
+    {about?.headshot && (
+      <img
+        class="headshot"
+        src={urlFor(about.headshot).width(240).height(240).fit('crop').url()}
+        alt={about.headshot.alt}
+        width="120"
+        height="120"
+      />
+    )}
+    <h1>Connecting ideas. Creating clarity. Helping leaders navigate what&rsquo;s next.</h1>
+    <p class="text-secondary supporting">
+      Research, insights, and speaking on where AI, leadership, and organizational change intersect.
+    </p>
+  </section>
+
+  <section class="wrap latest">
+    <p class="text-muted latest-label">Latest</p>
+    <div class="latest-grid">
+      {latest.map((item) => (
+        <a class="card latest-card" href={item.href}>
+          <span class={`badge ${item.badgeClass}`}>{item.badgeLabel}</span>
+          <h3>{item.title}</h3>
+          <p class="text-secondary">{item.description}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    text-align: center;
+    padding: var(--space-5) var(--space-3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .headshot {
+    border-radius: 999px;
+    object-fit: cover;
+    margin-bottom: var(--space-4);
+  }
+
+  .hero h1 {
+    max-width: 640px;
+    font-size: 2rem;
+  }
+
+  .supporting {
+    max-width: 520px;
+    font-size: 1.1rem;
+  }
+
+  .latest {
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-5);
+  }
+
+  .latest-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    margin-bottom: var(--space-3);
+  }
+
+  .latest-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--space-3);
+  }
+
+  .latest-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    color: inherit;
+  }
+
+  .latest-card:hover {
+    text-decoration: none;
+    border-color: var(--color-text-muted);
+  }
+
+  .latest-card h3 {
+    margin: 0;
+  }
+
+  .latest-card p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+</style>

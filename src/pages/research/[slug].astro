@@ -1,0 +1,71 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PortableText from '../../components/PortableText.astro';
+import { getAllResearch, getResearchBySlug } from '../../lib/sanity';
+import { formatDate } from '../../lib/utils';
+
+export async function getStaticPaths() {
+  const research = await getAllResearch();
+  return research
+    .filter((r) => r.hostingType === 'onsite')
+    .map((r) => ({ params: { slug: r.slug } }));
+}
+
+const { slug } = Astro.params;
+const entry = await getResearchBySlug(slug!);
+if (!entry) return Astro.redirect('/research');
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ScholarlyArticle',
+  headline: entry.title,
+  description: entry.abstract,
+  datePublished: entry.publishDate,
+  author: { '@type': 'Person', name: 'Colleen McCann' },
+  keywords: entry.topics.join(', '),
+};
+---
+
+<BaseLayout title={entry.title} description={entry.abstract} active="research" jsonLd={jsonLd}>
+  <article class="wrap paper">
+    <a class="link muted back-link" href="/research">&larr; Back to Research</a>
+    <div class="entry-top">
+      <span class="badge badge-research">{entry.topics[0]}</span>
+      <span class="text-muted">{formatDate(entry.publishDate)}</span>
+    </div>
+    <h1>{entry.title}</h1>
+    <p class="text-secondary abstract">{entry.abstract}</p>
+
+    {entry.pdfFile?.asset?.url && (
+      <p><a class="link muted" href={entry.pdfFile.asset.url}>Download PDF</a></p>
+    )}
+
+    <hr />
+
+    <PortableText value={entry.body || []} />
+  </article>
+</BaseLayout>
+
+<style>
+  .paper {
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-5);
+    max-width: 720px;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-bottom: var(--space-3);
+  }
+
+  .entry-top {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+
+  .abstract {
+    font-size: 1.1rem;
+  }
+</style>

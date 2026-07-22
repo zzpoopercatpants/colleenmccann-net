@@ -1,0 +1,173 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getAllResearch } from '../../lib/sanity';
+import { yearOf } from '../../lib/utils';
+
+const research = await getAllResearch();
+const allTopics = Array.from(new Set(research.flatMap((r) => r.topics))).sort();
+
+const description = 'Long form research and analysis by Colleen McCann.';
+---
+
+<BaseLayout title="Research" description={description} active="research">
+  <section class="wrap page-head">
+    <h1>Research</h1>
+    <p class="text-secondary subhead">Long form work exploring where ideas intersect.</p>
+  </section>
+
+  <section class="wrap filter-row">
+    <input
+      type="search"
+      id="search-input"
+      placeholder="Search by keyword"
+      aria-label="Search research by keyword"
+    />
+    <div class="pills" role="group" aria-label="Filter by topic">
+      <button class="pill active" data-topic="All">All</button>
+      {allTopics.map((topic) => (
+        <button class="pill" data-topic={topic}>{topic}</button>
+      ))}
+    </div>
+  </section>
+
+  <section class="wrap entries">
+    {research.map((r) => (
+      <article class="card entry" data-topics={r.topics.join('|')} data-search={`${r.title} ${r.abstract}`.toLowerCase()}>
+        <div class="entry-top">
+          <span class="badge badge-research">{r.topics[0]}</span>
+          <span class="text-muted">{yearOf(r.publishDate)}</span>
+        </div>
+        <h3>{r.title}</h3>
+        <p>{r.abstract}</p>
+        <div class="link-row">
+          {r.hostingType === 'onsite' ? (
+            <>
+              <a class="link" href={`/research/${r.slug}`}>Read the paper &rarr;</a>
+              {r.pdfFile?.asset?.url && (
+                <a class="link muted" href={r.pdfFile.asset.url}>Download PDF</a>
+              )}
+            </>
+          ) : (
+            <a class="link link-external" href={r.externalUrl}>
+              Read on {r.externalSourceName || 'external source'}
+            </a>
+          )}
+        </div>
+      </article>
+    ))}
+    <p class="text-muted no-results" hidden>No research matches your search.</p>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-head {
+    padding-top: var(--space-4);
+  }
+
+  .subhead {
+    font-size: 1.1rem;
+    margin-top: -0.5rem;
+  }
+
+  .filter-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: var(--space-3) auto var(--space-4);
+  }
+
+  #search-input {
+    background: var(--color-bg-raised);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    color: var(--color-text-primary);
+    padding: 0.6rem 0.9rem;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    max-width: 360px;
+  }
+
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .pill {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    border-radius: 999px;
+    padding: 0.3rem 0.8rem;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .pill.active {
+    border-color: var(--color-research);
+    color: var(--color-research);
+  }
+
+  .entries {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-bottom: var(--space-5);
+  }
+
+  .entry-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-1);
+  }
+
+  .entry h3 {
+    margin-bottom: var(--space-1);
+  }
+
+  .link-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
+  }
+</style>
+
+<script>
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const pills = document.querySelectorAll<HTMLButtonElement>('.pill');
+  const entries = document.querySelectorAll<HTMLElement>('.entry');
+  const noResults = document.querySelector<HTMLElement>('.no-results');
+
+  let activeTopic = 'All';
+
+  function applyFilters() {
+    const query = searchInput.value.trim().toLowerCase();
+    let visibleCount = 0;
+
+    entries.forEach((entry) => {
+      const topics = (entry.dataset.topics || '').split('|');
+      const search = entry.dataset.search || '';
+      const matchesTopic = activeTopic === 'All' || topics.includes(activeTopic);
+      const matchesSearch = !query || search.includes(query);
+      const visible = matchesTopic && matchesSearch;
+      entry.hidden = !visible;
+      if (visible) visibleCount++;
+    });
+
+    if (noResults) noResults.hidden = visibleCount > 0;
+  }
+
+  pills.forEach((pill) => {
+    pill.addEventListener('click', () => {
+      pills.forEach((p) => p.classList.remove('active'));
+      pill.classList.add('active');
+      activeTopic = pill.dataset.topic || 'All';
+      applyFilters();
+    });
+  });
+
+  searchInput?.addEventListener('input', applyFilters);
+</script>

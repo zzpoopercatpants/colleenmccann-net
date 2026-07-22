@@ -1,0 +1,48 @@
+---
+import { getContact } from '../lib/sanity';
+
+const contact = await getContact().catch(() => null);
+---
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>Colleen McCann</span>
+    {contact?.linkedinUrl && (
+      <a href={contact.linkedinUrl} class="linkedin-link" rel="noopener" target="_blank">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.04-1.85-3.04-1.86 0-2.15 1.45-2.15 2.95v5.66H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.38-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"></path>
+        </svg>
+        <span>LinkedIn</span>
+      </a>
+    )}
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--color-border);
+    margin-top: var(--space-5);
+  }
+
+  .footer-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-3);
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+
+  .linkedin-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    color: var(--color-text-muted);
+  }
+
+  .linkedin-link:hover {
+    color: var(--color-text-primary);
+    text-decoration: none;
+  }
+</style>
