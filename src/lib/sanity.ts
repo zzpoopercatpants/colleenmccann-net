@@ -5,7 +5,11 @@ export const client: SanityClient = createClient({
   projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
   dataset: import.meta.env.PUBLIC_SANITY_DATASET,
   apiVersion: import.meta.env.PUBLIC_SANITY_API_VERSION || '2025-01-01',
-  useCdn: true,
+  // The webhook rebuilds within seconds of a publish, faster than Sanity's
+  // CDN cache reliably catches up -- useCdn:true risks a build seeing stale
+  // (pre-publish) data. This is a build-time-only client (SSG), so the
+  // small latency/cost of hitting the live API instead is negligible.
+  useCdn: false,
 });
 
 const builder = createImageUrlBuilder(client);
