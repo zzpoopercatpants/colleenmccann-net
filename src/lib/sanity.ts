@@ -57,7 +57,7 @@ export interface MediaEntry {
 
 export interface AboutDoc {
   name: string;
-  headshot: { asset: { _ref: string }; alt: string };
+  headshot: { asset: { url: string }; alt: string };
   bio: any[];
 }
 
@@ -108,7 +108,7 @@ export async function getAllMedia(): Promise<MediaEntry[]> {
 }
 
 export async function getAbout(): Promise<AboutDoc | null> {
-  return client.fetch(`*[_type == "about"][0]{ name, headshot{asset->{_ref, url}, alt}, bio }`);
+  return client.fetch(`*[_type == "about"][0]{ name, headshot{asset->{url}, alt}, bio }`);
 }
 
 export async function getContact(): Promise<ContactDoc | null> {
