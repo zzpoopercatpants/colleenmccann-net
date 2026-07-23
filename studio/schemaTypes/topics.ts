@@ -11,11 +11,11 @@ export const topicOptions = [
 export const topicsField = {
   name: 'topics',
   title: 'Topic tags',
+  description: `Type a tag and press enter. Reuse these where they fit, so filtering stays consistent: ${topicOptions.join(', ')}. New tags are fine too.`,
   type: 'array',
   of: [{type: 'string'}],
   options: {
     layout: 'tags',
-    list: topicOptions,
   },
   validation: (Rule: any) => Rule.min(1),
 }
