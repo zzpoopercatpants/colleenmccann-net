@@ -27,7 +27,7 @@ export interface ResearchEntry {
   topics: string[];
   hostingType: 'onsite' | 'external';
   body?: any[];
-  pdfFile?: { asset: { url: string } };
+  pdfFile?: { url: string };
   externalUrl?: string;
   externalSourceName?: string;
 }

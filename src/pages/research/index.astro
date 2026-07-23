@@ -43,8 +43,8 @@ const description = 'Long form research and analysis by Colleen McCann.';
           {r.hostingType === 'onsite' ? (
             <>
               <a class="link" href={`/research/${r.slug}`}>Read the paper &rarr;</a>
-              {r.pdfFile?.asset?.url && (
-                <a class="link muted" href={r.pdfFile.asset.url}>Download PDF</a>
+              {r.pdfFile?.url && (
+                <a class="link muted" href={r.pdfFile.url}>Download PDF</a>
               )}
             </>
           ) : (

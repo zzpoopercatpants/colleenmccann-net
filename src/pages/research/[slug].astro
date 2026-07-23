@@ -36,8 +36,8 @@ const jsonLd = {
     <h1>{entry.title}</h1>
     <p class="text-secondary abstract">{entry.abstract}</p>
 
-    {entry.pdfFile?.asset?.url && (
-      <p><a class="link muted" href={entry.pdfFile.asset.url}>Download PDF</a></p>
+    {entry.pdfFile?.url && (
+      <p><a class="link muted" href={entry.pdfFile.url}>Download PDF</a></p>
     )}
 
     <hr />
