@@ -1,12 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getAllResearch, getAllInsights, getAllMedia, getAbout, urlFor } from '../lib/sanity';
+import { getAllResearch, getAllInsights, getAllMedia } from '../lib/sanity';
 
-const [research, insights, media, about] = await Promise.all([
+const [research, insights, media] = await Promise.all([
   getAllResearch(),
   getAllInsights(),
   getAllMedia(),
-  getAbout(),
 ]);
 
 type LatestItem = {
@@ -57,19 +56,12 @@ const description =
 
 <BaseLayout title="Colleen McCann" description={description} active="">
   <section class="hero wrap">
-    {about?.headshot && (
-      <img
-        class="headshot"
-        src={urlFor(about.headshot).width(240).height(240).fit('crop').url()}
-        alt={about.headshot.alt}
-        width="120"
-        height="120"
-      />
-    )}
-    <h1>Connecting ideas. Creating clarity. Helping leaders navigate what&rsquo;s next.</h1>
-    <p class="text-secondary supporting">
-      Research, insights, and speaking on where AI, leadership, and organizational change intersect.
-    </p>
+    <div class="headline-box">
+      <h1>Connecting Ideas. Creating Clarity. Helping Leaders Navigate What&rsquo;s Next</h1>
+      <p class="text-secondary supporting">
+        Thought leader and speaker on where AI, automation, business strategy, leadership and organizational change intersect
+      </p>
+    </div>
   </section>
 
   <section class="wrap latest">
@@ -95,10 +87,12 @@ const description =
     align-items: center;
   }
 
-  .headshot {
-    border-radius: 999px;
-    object-fit: cover;
-    margin-bottom: var(--space-4);
+  .headline-box {
+    border-radius: 16px;
+    padding: var(--space-4) var(--space-3);
+    background-image: url('/headline-bg.png');
+    background-size: cover;
+    background-position: center;
   }
 
   .hero h1 {
